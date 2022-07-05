@@ -24,9 +24,11 @@ func (controller *Controller) Start() error {
 		return errors.New("No action associated")
 	}
 	n <- true
-	for <-n {
-		time.Sleep(controller.lapse)
-		controller.action(n)
-	}
+	go func() {
+		for <-n {
+			time.Sleep(controller.lapse)
+			controller.action(n)
+		}
+	}()
 	return nil
 }
