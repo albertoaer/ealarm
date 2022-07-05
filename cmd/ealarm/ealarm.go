@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/albertoaer/ealarm/internal/controller"
+	"github.com/albertoaer/ealarm/controller"
+	"github.com/albertoaer/ealarm/ui"
 )
 
 func getInput() (time.Duration, error) {
@@ -29,7 +30,10 @@ func main() {
 		return
 	}
 	cnt := controller.New(d)
+	ui := ui.New()
+	cnt.SetAction(ui.NewAlarm().Show)
 	if err = cnt.Start(); err != nil {
 		fmt.Printf("ERROR: %s\n", err.Error())
 	}
+	ui.Run()
 }
