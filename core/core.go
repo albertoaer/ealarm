@@ -10,4 +10,5 @@ type AlarmConfiguration struct {
 	Message  string
 	Duration time.Duration
 	Track    *audio.Audio
+	Times    int
 }

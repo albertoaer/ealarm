@@ -18,6 +18,7 @@ func loadConfiguration(config *AlarmConfiguration) (err error) {
 	seconds := flag.Int("s", 0, "Number of seconds")
 	msg := flag.String("d", "ALARM!", "Display message")
 	track := flag.String("t", "", "Track file as alarm tone")
+	times := flag.Int("n", -1, "Number of times to play, if it's negative it will loop infinitely")
 	flag.Parse()
 	dur := time.Duration(*hours)*time.Hour + time.Duration(*minutes)*time.Minute + time.Duration(*seconds)*time.Second
 	if dur <= 0 {
@@ -33,6 +34,7 @@ func loadConfiguration(config *AlarmConfiguration) (err error) {
 	if config.Track, err = audio.From(*track); err != nil {
 		return
 	}
+	config.Times = *times
 	return
 }
 
@@ -44,7 +46,7 @@ func main() {
 		flag.PrintDefaults()
 		return
 	}
-	cnt := controller.New(config.Duration)
+	cnt := controller.New(&config)
 	ui := ui.New()
 	cnt.SetAction(ui.NewAlarm(&config).Show)
 	if err = cnt.Start(); err != nil {

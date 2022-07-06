@@ -3,15 +3,17 @@ package controller
 import (
 	"errors"
 	"time"
+
+	. "github.com/albertoaer/ealarm/core"
 )
 
 type Controller struct {
-	lapse  time.Duration
+	config *AlarmConfiguration
 	action func(chan bool)
 }
 
-func New(lapse time.Duration) *Controller {
-	return &Controller{lapse, nil}
+func New(config *AlarmConfiguration) *Controller {
+	return &Controller{config, nil}
 }
 
 func (controller *Controller) SetAction(action func(chan bool)) {
@@ -19,15 +21,17 @@ func (controller *Controller) SetAction(action func(chan bool)) {
 }
 
 func (controller *Controller) Start() error {
-	n := make(chan bool, 1)
+	n := make(chan bool, 2)
 	if controller.action == nil {
 		return errors.New("No action associated")
 	}
 	n <- true
+	times := 0
 	go func() {
-		for <-n {
-			time.Sleep(controller.lapse)
+		for times < controller.config.Times && <-n {
+			time.Sleep(controller.config.Duration)
 			controller.action(n)
+			times++
 		}
 	}()
 	return nil
