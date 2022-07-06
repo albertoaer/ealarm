@@ -28,10 +28,12 @@ func (controller *Controller) Start() error {
 	n <- true
 	times := 0
 	go func() {
-		for times < controller.config.Times && <-n {
+		for (controller.config.Times < 0 || times < controller.config.Times) && <-n {
 			time.Sleep(controller.config.Duration)
 			controller.action(n)
-			times++
+			if controller.config.Times >= 0 {
+				times++
+			}
 		}
 	}()
 	return nil
