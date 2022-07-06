@@ -1,6 +1,7 @@
 package audio
 
 import (
+	"log"
 	"os"
 	"time"
 
@@ -9,11 +10,26 @@ import (
 	"github.com/faiface/beep/speaker"
 )
 
-type Audio struct {
-	streamer beep.StreamSeekCloser
+const quality int = 1
+
+var mx *beep.Mixer
+var sampleRate beep.SampleRate
+
+func init() {
+	mx = &beep.Mixer{}
+	sampleRate = beep.SampleRate(48000)
+	if err := speaker.Init(sampleRate, sampleRate.N(time.Second/10)); err != nil {
+		log.Fatal(err)
+	}
+	go speaker.Play(mx)
 }
 
-func Play(audio string) (*Audio, error) {
+type Audio struct {
+	streamer   beep.StreamSeekCloser
+	sampleRate beep.SampleRate
+}
+
+func From(audio string) (*Audio, error) {
 	f, err := os.Open(audio)
 	if err != nil {
 		return nil, err
@@ -25,17 +41,25 @@ func Play(audio string) (*Audio, error) {
 		return nil, err
 	}
 
-	if err = speaker.Init(format.SampleRate, format.SampleRate.N(time.Second/10)); err != nil {
-		return nil, err
-	}
+	return &Audio{streamer, format.SampleRate}, nil
+}
 
-	go speaker.Play(beep.Seq(streamer, beep.Callback(func() {
-		streamer.Close()
-	})))
+func (audio *Audio) Play() {
+	audio.streamer.Seek(0)
+	rs := beep.Resample(quality, audio.sampleRate, sampleRate, audio.streamer)
+	mx.Add(rs)
+}
 
-	return &Audio{streamer}, nil
+func (audio *Audio) PlayLoop() {
+	audio.streamer.Seek(0)
+	rs := beep.Resample(quality, audio.sampleRate, sampleRate, beep.Loop(-1, audio.streamer))
+	mx.Add(rs)
 }
 
 func (audio *Audio) Stop() {
+	audio.streamer.Seek(audio.streamer.Len())
+}
+
+func (audio *Audio) Close() {
 	audio.streamer.Close()
 }

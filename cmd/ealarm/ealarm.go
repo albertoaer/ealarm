@@ -4,10 +4,9 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"io/fs"
-	"os"
 	"time"
 
+	"github.com/albertoaer/ealarm/audio"
 	"github.com/albertoaer/ealarm/controller"
 	. "github.com/albertoaer/ealarm/core"
 	"github.com/albertoaer/ealarm/ui"
@@ -31,11 +30,9 @@ func loadConfiguration(config *AlarmConfiguration) (err error) {
 		return
 	}
 	config.Message = *msg
-	if _, err = os.Stat(*track); errors.Is(err, fs.ErrNotExist) {
-		err = errors.New("A valid track is required")
+	if config.Track, err = audio.From(*track); err != nil {
 		return
 	}
-	config.Track = *track
 	return
 }
 

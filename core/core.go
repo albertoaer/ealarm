@@ -1,9 +1,13 @@
 package core
 
-import "time"
+import (
+	"time"
+
+	"github.com/albertoaer/ealarm/audio"
+)
 
 type AlarmConfiguration struct {
 	Message  string
 	Duration time.Duration
-	Track    string
+	Track    *audio.Audio
 }
