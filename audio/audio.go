@@ -28,6 +28,7 @@ type Audio struct {
 	streamer   beep.StreamSeekCloser
 	sampleRate beep.SampleRate
 	looping    bool
+	playing    bool
 }
 
 func From(audio string) (*Audio, error) {
@@ -42,20 +43,23 @@ func From(audio string) (*Audio, error) {
 		return nil, err
 	}
 
-	return &Audio{streamer, format.SampleRate, false}, nil
+	return &Audio{streamer, format.SampleRate, false, false}, nil
 }
 
 func (audio *Audio) Stream(samples [][2]float64) (n int, ok bool) {
 	if audio.streamer.Err() != nil {
+		audio.playing = false
 		return 0, false
 	}
 	for len(samples) > 0 {
 		sn, sok := audio.streamer.Stream(samples)
 		if !sok {
 			if !audio.looping {
+				audio.playing = false
 				break
 			}
 			if err := audio.streamer.Seek(0); err != nil {
+				audio.playing = false
 				return n, true //Return last streamed on error seeking 0
 			}
 			continue
@@ -73,15 +77,21 @@ func (audio *Audio) Err() error {
 func (audio *Audio) Play() {
 	audio.streamer.Seek(0)
 	audio.looping = false
-	rs := beep.Resample(quality, audio.sampleRate, sampleRate, audio)
-	mx.Add(rs)
+	if !audio.playing {
+		rs := beep.Resample(quality, audio.sampleRate, sampleRate, audio)
+		mx.Add(rs)
+		audio.playing = true
+	}
 }
 
 func (audio *Audio) PlayLoop() {
 	audio.streamer.Seek(0)
 	audio.looping = true
-	rs := beep.Resample(quality, audio.sampleRate, sampleRate, audio)
-	mx.Add(rs)
+	if !audio.playing {
+		rs := beep.Resample(quality, audio.sampleRate, sampleRate, audio)
+		mx.Add(rs)
+		audio.playing = true
+	}
 }
 
 func (audio *Audio) Stop() {

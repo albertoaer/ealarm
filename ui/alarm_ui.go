@@ -21,9 +21,10 @@ func (ui *UI) NewAlarm(config *AlarmConfiguration) *AlarmUI {
 func (alarm *AlarmUI) Show(n chan bool) {
 	alarm.config.Track.PlayLoop()
 	alarm.w.SetCloseIntercept(func() {
-		n <- true
-		alarm.config.Track.Stop()
 		alarm.w.Hide()
+		alarm.config.Track.Stop()
+		n <- true
 	})
+
 	alarm.w.Show()
 }

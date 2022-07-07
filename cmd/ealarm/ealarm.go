@@ -21,8 +21,8 @@ func loadConfiguration(config *AlarmConfiguration) (err error) {
 	times := flag.Int("n", -1, "Number of times to play, if it's negative it will loop infinitely")
 	flag.Parse()
 	dur := time.Duration(*hours)*time.Hour + time.Duration(*minutes)*time.Minute + time.Duration(*seconds)*time.Second
-	if dur <= 0 {
-		err = errors.New("Elapsed time must be positive and greater than 0 seconds")
+	if dur < 0 {
+		err = errors.New("Elapsed time must not be negative")
 		return
 	}
 	config.Duration = dur
