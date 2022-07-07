@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/albertoaer/ealarm/audio"
-	"github.com/albertoaer/ealarm/controller"
 	. "github.com/albertoaer/ealarm/core"
 	"github.com/albertoaer/ealarm/ui"
 )
@@ -46,7 +45,7 @@ func main() {
 		flag.PrintDefaults()
 		return
 	}
-	cnt := controller.New(&config)
+	cnt := NewController(&config)
 	ui := ui.New()
 	cnt.SetAction(ui.NewAlarm(&config).Show)
 	if err = cnt.Start(); err != nil {
