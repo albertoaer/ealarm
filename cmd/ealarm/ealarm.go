@@ -48,6 +48,9 @@ func main() {
 	cnt := NewController(&config)
 	ui := ui.New()
 	cnt.SetAction(ui.NewAlarm(&config).Show)
+	cnt.SetOnQuit(func() {
+		ui.Quit()
+	})
 	if err = cnt.Start(); err != nil {
 		fmt.Printf("ERROR: %s\n", err.Error())
 	}
