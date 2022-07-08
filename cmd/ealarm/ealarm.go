@@ -47,7 +47,7 @@ func main() {
 	}
 	cnt := NewController(&config)
 	ui := ui.New()
-	cnt.SetAction(ui.NewAlarm(&config).Show)
+	cnt.SetCommand(ui.NewAlarm(&config))
 	cnt.SetOnQuit(func() {
 		ui.Quit()
 	})

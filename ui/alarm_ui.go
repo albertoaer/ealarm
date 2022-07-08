@@ -50,8 +50,8 @@ func (ui *UI) NewAlarm(config *AlarmConfiguration) *AlarmUI {
 	return alarm
 }
 
-func (alarm *AlarmUI) Show(n chan bool) {
+func (alarm *AlarmUI) Launch(next chan bool) {
 	alarm.config.Track.PlayLoop()
-	alarm.signal = &n
+	alarm.signal = &next
 	alarm.w.Show()
 }
