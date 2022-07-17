@@ -4,15 +4,20 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"os/exec"
 )
 
 type PresetCommand struct {
-	cmd *exec.Cmd
+	cmdLine []string
 }
 
 func (m *PresetCommand) Launch(next chan bool) {
-	e := m.cmd.Run()
+	cmd := exec.Command(m.cmdLine[0], m.cmdLine[1:]...)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	e := cmd.Run()
 	if e != nil {
 		fmt.Printf("Error running preset command, %s", e.Error())
 	}
@@ -27,6 +32,6 @@ func (m *PresetCommand) UnmarshalJSON(data []byte) error {
 	if len(line) == 0 {
 		return errors.New("Expecting at least command name")
 	}
-	m.cmd = exec.Command(line[0], line[1:]...)
+	m.cmdLine = line
 	return nil
 }
