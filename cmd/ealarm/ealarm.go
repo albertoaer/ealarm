@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/albertoaer/ealarm/audio"
 	. "github.com/albertoaer/ealarm/core"
@@ -40,20 +39,18 @@ func getProfile(presets *Presets) error {
 }
 
 func loadConfiguration(config *AlarmConfiguration, presets *Presets) (err error) {
-	hours := flag.Int("h", 0, "Number of hours")
-	minutes := flag.Int("m", 0, "Number of minutes")
-	seconds := flag.Int("s", 0, "Number of seconds")
-	msg := flag.String("d", "ALARM!", "Display message")
+	duration := flag.Duration("d", 0, "Duration of the wait between alarms")
+	msg := flag.String("m", "ALARM!", "Message to show at the UI")
 	track := flag.String("t", "", "Track file as alarm tone")
 	times := flag.Int("n", -1, "Number of times to play, if it's negative it will loop infinitely")
 	flag.Parse()
 	if err = getProfile(presets); err != nil {
 		return
 	}
-	dur := time.Duration(*hours)*time.Hour + time.Duration(*minutes)*time.Minute + time.Duration(*seconds)*time.Second
-	if dur < 0 {
-		return errors.New("Elapsed time must not be negative")
+	if *duration < 0 {
+		return errors.New("Duration must not be negative")
 	}
+	dur := *duration
 	config.Duration = dur
 	if len(*msg) == 0 {
 		return errors.New("Message must not be empty")
