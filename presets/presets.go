@@ -9,7 +9,7 @@ import (
 )
 
 type Presets struct {
-	Actions  map[string]string            `json:"actions,omitempty"`
+	Actions  map[string]*PresetCommand    `json:"actions,omitempty"`
 	Profiles map[string]map[string]string `json:"profiles,omitempty"`
 }
 
