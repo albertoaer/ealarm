@@ -12,30 +12,15 @@ import (
 	"github.com/albertoaer/ealarm/ui"
 )
 
-func getProfile(presets *Presets) error {
-	if flag.NArg() == 0 {
-		return nil
+func prepareActionFlag(ui *ui.UI, config *AlarmConfiguration, presets *Presets) *ActionFlag {
+	actionmap := make(map[string]ReentrantCommandBuilder)
+	for n, ac := range presets.Actions {
+		actionmap[n] = ReentrantCommandBuilder(func() ReentrantCommand { return ac })
 	}
-	if flag.NArg() > 1 {
-		return errors.New("Expecting just one non-flag arg as profile name")
-	}
-	m, in := presets.Profiles[flag.Arg(0)]
-	if !in {
-		return fmt.Errorf("Unknown profile: %s", flag.Arg(0))
-	}
-	write := make(map[string]string)
-	for k, v := range m {
-		write[k] = v
-	}
-	flag.Visit(func(f *flag.Flag) {
-		delete(write, f.Name)
-	})
-	for k, v := range write {
-		if e := flag.Set(k, v); e != nil {
-			return e
-		}
-	}
-	return nil
+	actionmap["ShowUI"] = ReentrantCommandBuilder(func() ReentrantCommand { return ui.NewAlarm(config) })
+	actionflag := &ActionFlag{"ShowUI", actionmap["ShowUI"], actionmap}
+	flag.Var(actionflag, "a", "Action to be executed, Syntax: CMD1[&CMD2[&CMDn]]")
+	return actionflag
 }
 
 func loadConfiguration(config *AlarmConfiguration, presets *Presets) (err error) {
@@ -66,7 +51,10 @@ func loadConfiguration(config *AlarmConfiguration, presets *Presets) (err error)
 func main() {
 	config := AlarmConfiguration{}
 	presets := LoadPresets()
+	ui := ui.New()
+	actionflag := prepareActionFlag(ui, &config, presets)
 	err := loadConfiguration(&config, presets)
+	config.Action = actionflag.action()
 	if err != nil {
 		fmt.Printf("ERROR: %s\n", err.Error())
 		var optional_flags string
@@ -78,8 +66,7 @@ func main() {
 		return
 	}
 	cnt := NewController(&config)
-	ui := ui.New()
-	cnt.SetCommand(ui.NewAlarm(&config))
+	cnt.SetCommand(config.Action)
 	cnt.SetOnQuit(func() {
 		ui.Quit()
 	})

@@ -11,4 +11,5 @@ type AlarmConfiguration struct {
 	Duration time.Duration
 	Track    *audio.Audio
 	Times    int
+	Action   ReentrantCommand
 }

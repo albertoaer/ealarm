@@ -6,19 +6,33 @@ type ReentrantCommand interface {
 	Launch(next chan bool)
 }
 
+type ReentrantCommandBuilder func() ReentrantCommand
+
 type multiCmd []ReentrantCommand
 
 func (m multiCmd) Launch(next chan bool) {
-	for _, cmd := range m {
+	for i, cmd := range m {
 		cmd.Launch(next)
-		v := <-next
-		next <- v
-		if !v {
-			break
+		if i < len(m)-1 {
+			v := <-next
+			if !v {
+				next <- v
+				break
+			}
 		}
 	}
 }
 
 func ManyCommands(cmds ...ReentrantCommand) ReentrantCommand {
 	return multiCmd(cmds)
+}
+
+func ManyCommandsBuilder(builders ...ReentrantCommandBuilder) ReentrantCommandBuilder {
+	return func() ReentrantCommand {
+		cmds := make([]ReentrantCommand, len(builders))
+		for i := range builders {
+			cmds[i] = builders[i]()
+		}
+		return ManyCommands(cmds...)
+	}
 }
