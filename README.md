@@ -1,6 +1,19 @@
 # Ealarm
 
-Fully configurable alarm with gui and command line integration
+Command line tool to run cyclic commands, including a default alarm ui
+
+# Features
+
+- Alarm configuration
+  - duration
+  - display message
+  - track to play
+  - number of times to play, infinite for n < 0
+  - cyclic action to run
+  - compound actions of other actions, syntax: "Action1&Action2"
+- Presets file
+  - actions: User defined command line actions
+  - profiles: Collection of predefined Ealarm configurations
 
 # Why?
 
