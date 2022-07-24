@@ -9,7 +9,7 @@ import (
 type AlarmConfiguration struct {
 	Message  string
 	Duration time.Duration
-	Track    *audio.Audio
+	Track    audio.Playable
 	Times    int
 	Action   ReentrantCommand
 }

@@ -2,11 +2,9 @@ package audio
 
 import (
 	"log"
-	"os"
 	"time"
 
 	"github.com/faiface/beep"
-	"github.com/faiface/beep/mp3"
 	"github.com/faiface/beep/speaker"
 )
 
@@ -29,21 +27,6 @@ type Audio struct {
 	sampleRate beep.SampleRate
 	looping    bool
 	playing    bool
-}
-
-func From(audio string) (*Audio, error) {
-	f, err := os.Open(audio)
-	if err != nil {
-		return nil, err
-	}
-
-	streamer, format, err := mp3.Decode(f)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &Audio{streamer, format.SampleRate, false, false}, nil
 }
 
 func (audio *Audio) Stream(samples [][2]float64) (n int, ok bool) {
