@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/albertoaer/ealarm/audio"
 	. "github.com/albertoaer/ealarm/core"
 	. "github.com/albertoaer/ealarm/presets"
 	"github.com/albertoaer/ealarm/ui"
@@ -26,7 +25,8 @@ func prepareActionFlag(ui *ui.UI, config *AlarmConfiguration, presets *Presets) 
 func loadConfiguration(config *AlarmConfiguration, presets *Presets) (err error) {
 	duration := flag.Duration("d", 0, "Duration of the wait between alarms")
 	msg := flag.String("m", "ALARM!", "Message to show at the UI")
-	track := flag.String("t", "", "Track file as alarm tone")
+	trackflag := NewTrackFlag()
+	flag.Var(trackflag, "t", "Track file as alarm tone")
 	times := flag.Int("n", -1, "Number of times to play, if it's negative it will loop infinitely")
 	flag.Parse()
 	if err = getProfile(presets); err != nil {
@@ -41,9 +41,7 @@ func loadConfiguration(config *AlarmConfiguration, presets *Presets) (err error)
 		return errors.New("Message must not be empty")
 	}
 	config.Message = *msg
-	if config.Track, err = audio.From(*track); err != nil {
-		return
-	}
+	config.Track = trackflag.track
 	config.Times = *times
 	return
 }

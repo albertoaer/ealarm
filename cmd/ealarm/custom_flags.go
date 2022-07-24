@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/albertoaer/ealarm/audio"
 	. "github.com/albertoaer/ealarm/core"
 	. "github.com/albertoaer/ealarm/presets"
 )
@@ -62,4 +63,23 @@ func getProfile(presets *Presets) error {
 		}
 	}
 	return nil
+}
+
+type TrackFlag struct {
+	src   string
+	track audio.Playable
+}
+
+func NewTrackFlag() *TrackFlag {
+	return &TrackFlag{"SILENCE", audio.Silence()}
+}
+
+func (c *TrackFlag) String() string {
+	return c.src
+}
+
+func (c *TrackFlag) Set(r string) (err error) {
+	c.src = r
+	c.track, err = audio.From(r)
+	return
 }
