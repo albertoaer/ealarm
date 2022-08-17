@@ -8,9 +8,10 @@ import (
 	"os"
 )
 
+type Profile map[string]string
 type Presets struct {
-	Actions  map[string]*PresetCommand    `json:"actions,omitempty"`
-	Profiles map[string]map[string]string `json:"profiles,omitempty"`
+	Actions  map[string]*PresetCommand `json:"actions,omitempty"`
+	Profiles map[string]Profile        `json:"profiles,omitempty"`
 }
 
 const presets_file string = "./presets.json"

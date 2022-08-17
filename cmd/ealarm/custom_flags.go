@@ -39,19 +39,31 @@ func (c *ActionFlag) Set(r string) error {
 	return nil
 }
 
-func getProfile(presets *Presets) error {
+func getProfile(presets *Presets) (Profile, error) {
 	if flag.NArg() == 0 {
-		return nil
+		d := presets.Profiles["default"]
+		return d, nil //If the profile is not inside profiles the profile will be null
 	}
 	if flag.NArg() > 1 {
-		return errors.New("Expecting just one non-flag arg as profile name")
+		return nil, errors.New("Expecting just one non-flag arg as profile name")
 	}
 	m, in := presets.Profiles[flag.Arg(0)]
 	if !in {
-		return fmt.Errorf("Unknown profile: %s", flag.Arg(0))
+		return nil, fmt.Errorf("Unknown profile: %s", flag.Arg(0))
+	}
+	return m, nil
+}
+
+func applyProfileTo(presets *Presets) error {
+	profile, err := getProfile(presets)
+	if err != nil {
+		return err
+	}
+	if profile == nil {
+		return nil
 	}
 	write := make(map[string]string)
-	for k, v := range m {
+	for k, v := range profile {
 		write[k] = v
 	}
 	flag.Visit(func(f *flag.Flag) {

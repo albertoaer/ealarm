@@ -29,7 +29,7 @@ func loadConfiguration(config *AlarmConfiguration, presets *Presets) (err error)
 	flag.Var(trackflag, "t", "Track file as alarm tone")
 	times := flag.Int("n", -1, "Number of times to play, if it's negative it will loop infinitely")
 	flag.Parse()
-	if err = getProfile(presets); err != nil {
+	if err = applyProfileTo(presets); err != nil {
 		return
 	}
 	if *duration < 0 {
